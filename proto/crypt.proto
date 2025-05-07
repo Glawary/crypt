@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package server;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "crypt/generated";
+
+service CryptoService {
+  // ListCryptoCurrencies получение списка криптовалют
+  rpc ListCryptoCurrencies(ListCryptoCurrenciesRequest) returns (ListCryptoCurrenciesResponse){};
+}
+
+message ListCryptoCurrenciesRequest {
+  CryptoFilter filter = 1;
+}
+
+message CryptoFilter {
+}
+
+message ListCryptoCurrenciesResponse {
+  repeated CryptoCurrency currencies = 1;
+}
+
+message CryptoCurrency {
+  int32 cryptocurrency_id = 1;
+  string cryptocurrency_ticker = 2;
+  google.protobuf.Timestamp cryptocurrency_create_timestamp = 3;
+  repeated CryptoCurrencyInfo data = 4;
+}
+
+message CryptoCurrencyInfo {
+  string cryptoexchange_name = 1;
+  bytes ohlcv = 2;
+  int64 last = 3;
+  int64 spread = 4;
+}
