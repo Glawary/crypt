@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -50,31 +51,41 @@ func (rec *CryptService) ListCryptoCurrency(ctx context.Context) ([]*model.Crypt
 	var dataArr []*model.DataCrypto
 	var dataCrypto *model.DataCrypto
 	var cryptocurrencyId, cryptocurrencyNewId int
+	var ticker, tickerNew string
+	var timestamp, timestampNew time.Time
 	for rows.Next() {
 		crypt = &model.Crypto{}
 		dataCrypto = &model.DataCrypto{}
 		err = rows.Scan(
 			&cryptocurrencyNewId,
-			&crypt.CryptocurrencyTicker,
+			&tickerNew,
 			&dataCrypto.CryptoexchangeName,
 			&dataCrypto.DataOhlcv,
 			&dataCrypto.DataOrderBook,
-			&crypt.CryptocurrencyCreateTimestamp,
+			&timestampNew,
 		)
 		if err != nil {
 			return nil, err
 		}
-		crypt.CryptocurrencyId = cryptocurrencyNewId
 		if cryptocurrencyId != cryptocurrencyNewId {
 			if cryptocurrencyId != 0 {
+				crypt.CryptocurrencyId = cryptocurrencyId
+				crypt.CryptocurrencyTicker = ticker
+				crypt.CryptocurrencyCreateTimestamp = timestamp
 				crypt.Data = dataArr
 				res = append(res, crypt)
 			}
-			cryptocurrencyId = cryptocurrencyNewId
 			dataArr = []*model.DataCrypto{}
 		}
+		cryptocurrencyId = cryptocurrencyNewId
+		ticker = tickerNew
+		timestamp = timestampNew
 		dataArr = append(dataArr, dataCrypto)
 	}
+	crypt = &model.Crypto{}
+	crypt.CryptocurrencyId = cryptocurrencyId
+	crypt.CryptocurrencyTicker = ticker
+	crypt.CryptocurrencyCreateTimestamp = timestamp
 	crypt.Data = dataArr
 	res = append(res, crypt)
 	return res, nil
