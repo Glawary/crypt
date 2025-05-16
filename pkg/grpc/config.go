@@ -1,5 +1,5 @@
 package grpc
 
 type GRPCConfig struct {
-	Url string `env:"GRPC_URL" envDefault:"localhost:8080"`
+	Url string `env:"GRPC_URL"`
 }

@@ -16,6 +16,7 @@ message ListCryptoCurrenciesRequest {
 }
 
 message CryptoFilter {
+  string cryptoexchange_name = 1;
 }
 
 message ListCryptoCurrenciesResponse {

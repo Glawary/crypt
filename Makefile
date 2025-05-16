@@ -22,6 +22,6 @@ docker-image:
 
 docker-run-project:
 	docker run --name gpt \
-		-p 8090:8090 \
+		-p 8050:8050 \
 		-d goproject
 .PHONY: dkt

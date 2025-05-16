@@ -8,7 +8,9 @@ import (
 
 	"github.com/Glawary/crypt/internal/client"
 	"github.com/Glawary/crypt/internal/config"
+	"github.com/Glawary/crypt/internal/interface"
 	grpc_service "github.com/Glawary/crypt/internal/transport/grpc"
+	http_service "github.com/Glawary/crypt/internal/transport/http"
 	"github.com/Glawary/crypt/internal/usecase"
 )
 
@@ -24,7 +26,18 @@ func Run() {
 	}
 
 	cryptService := usecase.NewCryptService()
-	grpcServer, err := grpc_service.InitServer(cfg.GRPCServer, cryptService)
+	var server _interface.Server
+	if cfg.GRPCServer.Url != "" {
+		server, err = grpc_service.InitServer(cfg.GRPCServer, cryptService)
+		if err != nil {
+			log.Printf("error initializing http: %v", err)
+		}
+	} else if cfg.HttpServer.Url != "" {
+		server, err = http_service.InitServer(cfg.HttpServer, cryptService)
+		if err != nil {
+			log.Printf("error initializing http: %v", err)
+		}
+	}
 	if err != nil {
 		log.Printf("error initializing grpc: %v", err)
 	}
@@ -33,9 +46,8 @@ func Run() {
 	select {
 	case s := <-interrupt:
 		log.Println("Got signal:", s)
-	case err := <-grpcServer.GetNotify():
+	case err := <-server.GetNotify():
 		log.Println("Got error:", err)
 	}
-
-	grpcServer.Shutdown()
+	server.Shutdown()
 }

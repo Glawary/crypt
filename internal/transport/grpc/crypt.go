@@ -7,6 +7,7 @@ import (
 
 	pb "github.com/Glawary/crypt/generated"
 	"github.com/Glawary/crypt/internal/usecase"
+	"github.com/Glawary/crypt/internal/usecase/model"
 )
 
 type CryptServer struct {
@@ -21,7 +22,7 @@ func NewCryptServer(cryptService *usecase.CryptService) *CryptServer {
 }
 
 func (rec *CryptServer) ListCryptoCurrencies(ctx context.Context, req *pb.ListCryptoCurrenciesRequest) (*pb.ListCryptoCurrenciesResponse, error) {
-	res, err := rec.cryptService.ListCryptoCurrency(ctx)
+	res, err := rec.cryptService.ListCryptoCurrency(ctx, &model.Filter{CryptexchangeName: req.GetFilter().GetCryptoexchangeName()})
 	if err != nil {
 		return nil, err
 	}

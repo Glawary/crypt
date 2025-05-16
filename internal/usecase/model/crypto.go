@@ -16,3 +16,7 @@ type DataCrypto struct {
 	DataOhlcv          []byte `db:"data_olhcv" json:"data_olhcv"`
 	DataOrderBook      []byte `db:"data_order_book" json:"data_order_book"`
 }
+
+type Filter struct {
+	CryptexchangeName string `db:"cryptoexchange_name" json:"cryptoexchange_name"`
+}

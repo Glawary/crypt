@@ -26,7 +26,7 @@ func NewGRPCServer(cfg *GRPCConfig) *GRPCServer {
 		notify: make(chan error, 1),
 	}
 
-	grpcServer.start()
+	grpcServer.Start()
 
 	return grpcServer
 }
@@ -39,7 +39,7 @@ func (rec *GRPCServer) GetGRPCServer() *grpc.Server {
 	return rec.server
 }
 
-func (rec *GRPCServer) start() {
+func (rec *GRPCServer) Start() {
 	go func() {
 		listen, err := net.Listen("tcp", rec.cfg.Url)
 		if err != nil {

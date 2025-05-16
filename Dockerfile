@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 FROM golang:1.22.2
 
 WORKDIR /app
@@ -12,6 +10,6 @@ COPY . .
 
 RUN go build -o main .
 
-EXPOSE 8090
+EXPOSE 8050
 
 CMD ["./main"]
