@@ -1,0 +1,60 @@
+basePath: /
+definitions:
+  model.Crypto:
+    properties:
+      cryptocurrencyCreateTimestamp:
+        type: string
+      cryptocurrencyId:
+        type: integer
+      cryptocurrencyTicker:
+        type: string
+      data:
+        items:
+          $ref: '#/definitions/model.DataCrypto'
+        type: array
+    type: object
+  model.DataCrypto:
+    properties:
+      cryptoexchangeName:
+        type: string
+      data_olhcv:
+        items:
+          type: integer
+        type: array
+      data_order_book:
+        items:
+          type: integer
+        type: array
+    type: object
+host: localhost:8050
+info:
+  contact: {}
+  description: Сервис по получению инфы по криптовалютам с бирж
+  title: Crypt API
+paths:
+  /api/v1/list:
+    get:
+      consumes:
+      - application/json
+      operationId: list-crypto
+      parameters:
+      - description: Название биржы
+        in: query
+        name: cryptoexchange_name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: данные по криптовалюте
+          schema:
+            $ref: '#/definitions/model.Crypto'
+      summary: Получение информации по криптовалютам
+      tags:
+      - Crypt
+schemes:
+- http
+swagger: "2.0"
+tags:
+- description: Криптовалюты
+  name: Crypt

@@ -1,0 +1,94 @@
+{
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "Сервис по получению инфы по криптовалютам с бирж",
+        "title": "Crypt API",
+        "contact": {}
+    },
+    "host": "localhost:8050",
+    "basePath": "/",
+    "paths": {
+        "/api/v1/list": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Crypt"
+                ],
+                "summary": "Получение информации по криптовалютам",
+                "operationId": "list-crypto",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Название биржы",
+                        "name": "cryptoexchange_name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "данные по криптовалюте",
+                        "schema": {
+                            "$ref": "#/definitions/model.Crypto"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "model.Crypto": {
+            "type": "object",
+            "properties": {
+                "cryptocurrencyCreateTimestamp": {
+                    "type": "string"
+                },
+                "cryptocurrencyId": {
+                    "type": "integer"
+                },
+                "cryptocurrencyTicker": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.DataCrypto"
+                    }
+                }
+            }
+        },
+        "model.DataCrypto": {
+            "type": "object",
+            "properties": {
+                "cryptoexchangeName": {
+                    "type": "string"
+                },
+                "data_olhcv": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "data_order_book": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "description": "Криптовалюты",
+            "name": "Crypt"
+        }
+    ]
+}
