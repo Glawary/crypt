@@ -34,6 +34,24 @@ const docTemplate = `{
                         "description": "Название биржы",
                         "name": "cryptoexchange_name",
                         "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Цена снизу",
+                        "name": "price_from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Цена сверху",
+                        "name": "price_to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Ёршик",
+                        "name": "find_brush",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -51,9 +69,6 @@ const docTemplate = `{
         "model.Crypto": {
             "type": "object",
             "properties": {
-                "cryptocurrencyCreateTimestamp": {
-                    "type": "string"
-                },
                 "cryptocurrencyId": {
                     "type": "integer"
                 },
@@ -71,16 +86,10 @@ const docTemplate = `{
         "model.DataCrypto": {
             "type": "object",
             "properties": {
-                "cryptoexchangeName": {
+                "cryptoExchangeName": {
                     "type": "string"
                 },
                 "data_olhcv": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "data_order_book": {
                     "type": "array",
                     "items": {
                         "type": "integer"

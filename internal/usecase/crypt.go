@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"context"
-	"time"
+	"encoding/json"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -27,8 +27,6 @@ func (rec *CryptService) ListCryptoCurrency(ctx context.Context, filter *model.F
 		"cc.cryptocurrency_ticker as cryptocurrency_ticker",
 		"ce.cryptoexchange_name as cryptoexchange_name",
 		"cd.data_olhcv as data_olhcv",
-		"cd.data_order_book as data_order_book",
-		"cc.cryptocurrency_create_timestamp as cryptocurrency_create_timestamp",
 	).From("cryptocurrency_data as cd").
 		LeftJoin("cryptocurrency as cc ON cd.cryptocurrency_id = cc.cryptocurrency_id").
 		LeftJoin("cryptoexchange as ce ON ce.cryptoexchange_id = cd.cryptoexchange_id")
@@ -54,17 +52,14 @@ func (rec *CryptService) ListCryptoCurrency(ctx context.Context, filter *model.F
 	var dataCrypto *model.DataCrypto
 	var cryptocurrencyId, cryptocurrencyNewId int
 	var ticker, tickerNew string
-	var timestamp, timestampNew time.Time
 	for rows.Next() {
 		crypt = &model.Crypto{}
 		dataCrypto = &model.DataCrypto{}
 		err = rows.Scan(
 			&cryptocurrencyNewId,
 			&tickerNew,
-			&dataCrypto.CryptoexchangeName,
+			&dataCrypto.CryptoExchangeName,
 			&dataCrypto.DataOhlcv,
-			&dataCrypto.DataOrderBook,
-			&timestampNew,
 		)
 		if err != nil {
 			return nil, err
@@ -73,7 +68,6 @@ func (rec *CryptService) ListCryptoCurrency(ctx context.Context, filter *model.F
 			if cryptocurrencyId != 0 {
 				crypt.CryptocurrencyId = cryptocurrencyId
 				crypt.CryptocurrencyTicker = ticker
-				crypt.CryptocurrencyCreateTimestamp = timestamp
 				crypt.Data = dataArr
 				res = append(res, crypt)
 			}
@@ -81,16 +75,14 @@ func (rec *CryptService) ListCryptoCurrency(ctx context.Context, filter *model.F
 		}
 		cryptocurrencyId = cryptocurrencyNewId
 		ticker = tickerNew
-		timestamp = timestampNew
 		dataArr = append(dataArr, dataCrypto)
 	}
 	crypt = &model.Crypto{}
 	crypt.CryptocurrencyId = cryptocurrencyId
 	crypt.CryptocurrencyTicker = ticker
-	crypt.CryptocurrencyCreateTimestamp = timestamp
 	crypt.Data = dataArr
 	res = append(res, crypt)
-	return res, nil
+	return filterResult(res, filter), nil
 }
 
 func (rec *CryptService) applyFilter(qu sq.SelectBuilder, filter *model.Filter) sq.SelectBuilder {
@@ -98,8 +90,78 @@ func (rec *CryptService) applyFilter(qu sq.SelectBuilder, filter *model.Filter) 
 		return qu
 	}
 
-	if filter.CryptexchangeName != "" {
-		qu = qu.Where(sq.Eq{"ce.cryptoexchange_name": filter.CryptexchangeName})
+	if filter.CryptoExchangeName != "" {
+		qu = qu.Where(sq.Eq{"ce.cryptoexchange_name": filter.CryptoExchangeName})
 	}
 	return qu
+}
+
+func filterResult(res []*model.Crypto, filter *model.Filter) []*model.Crypto {
+	out := make([]*model.Crypto, 0, len(res))
+	var dataCrypto []*model.DataCrypto
+	for _, item := range res {
+		dataCrypto = make([]*model.DataCrypto, 0, len(item.Data))
+		for _, data := range item.Data {
+			var olhcv [][]float64
+			_ = json.Unmarshal([]byte(data.DataOhlcv), &olhcv)
+			if !(len(olhcv) == 0 || (filter.PriceFrom > 0 && olhcv[len(olhcv)-1][4] < filter.PriceFrom) ||
+				(filter.PriceTo > 0 && olhcv[len(olhcv)-1][4] > filter.PriceTo) || (filter.FindBrush && !detectBrush(olhcv))) {
+				dataCrypto = append(dataCrypto, &model.DataCrypto{})
+			}
+		}
+		if len(dataCrypto) > 0 {
+			out = append(out, item)
+		}
+	}
+	return out
+}
+
+func detectBrush(olhcv [][]float64) bool {
+	var sumClose float64
+	if len(olhcv) == 0 {
+		return false
+	}
+	closes := make([]float64, 0, len(olhcv))
+	for _, item := range olhcv {
+		closes = append(closes, item[4])
+		sumClose += item[4]
+	}
+
+	var sumVolume float64
+	volumes := make([]float64, 0, len(olhcv))
+	for _, item := range olhcv {
+		volumes = append(volumes, item[5]*item[4])
+		sumVolume += item[5]
+	}
+
+	avgClose := sumClose / float64(len(olhcv))
+	upperBound := avgClose * (1.01)
+	lowerBound := avgClose * (0.99)
+
+	outliers := 0
+	for _, item := range closes {
+		if !(lowerBound <= item && item <= upperBound) {
+			outliers += 1
+		}
+	}
+	if outliers > 2 {
+		return false
+	}
+
+	avgVolume := sumVolume / float64(len(volumes))
+	spikeCount := 0
+	for _, item := range volumes {
+		if item > avgVolume*2 {
+			spikeCount += 1
+		}
+	}
+	if spikeCount > 3 {
+		return false
+	}
+
+	lastClose := closes[len(closes)-1]
+	if !(lowerBound <= lastClose && lastClose <= upperBound) {
+		return false
+	}
+	return true
 }

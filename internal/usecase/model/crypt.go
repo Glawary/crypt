@@ -1,22 +1,19 @@
 package model
 
-import (
-	"time"
-)
-
 type Crypto struct {
-	CryptocurrencyId              int       `db:"cryptocurrency_id"`
-	CryptocurrencyTicker          string    `db:"cryptocurrency_ticker"`
-	CryptocurrencyCreateTimestamp time.Time `db:"cryptocurrency_create_timestamp"`
-	Data                          []*DataCrypto
+	CryptocurrencyId     int    `db:"cryptocurrency_id"`
+	CryptocurrencyTicker string `db:"cryptocurrency_ticker"`
+	Data                 []*DataCrypto
 }
 
 type DataCrypto struct {
-	CryptoexchangeName string `db:"cryptoexchange_name"`
+	CryptoExchangeName string `db:"cryptoexchange_name"`
 	DataOhlcv          []byte `db:"data_olhcv" json:"data_olhcv"`
-	DataOrderBook      []byte `db:"data_order_book" json:"data_order_book"`
 }
 
 type Filter struct {
-	CryptexchangeName string `db:"cryptoexchange_name" json:"cryptoexchange_name"`
+	CryptoExchangeName string  `json:"cryptoexchange_name"`
+	PriceFrom          float64 `json:"price_from"`
+	PriceTo            float64 `json:"price_to"`
+	FindBrush          bool    `json:"find_brush"`
 }

@@ -2,8 +2,6 @@ basePath: /
 definitions:
   model.Crypto:
     properties:
-      cryptocurrencyCreateTimestamp:
-        type: string
       cryptocurrencyId:
         type: integer
       cryptocurrencyTicker:
@@ -15,13 +13,9 @@ definitions:
     type: object
   model.DataCrypto:
     properties:
-      cryptoexchangeName:
+      cryptoExchangeName:
         type: string
       data_olhcv:
-        items:
-          type: integer
-        type: array
-      data_order_book:
         items:
           type: integer
         type: array
@@ -42,6 +36,18 @@ paths:
         in: query
         name: cryptoexchange_name
         type: string
+      - description: Цена снизу
+        in: query
+        name: price_from
+        type: number
+      - description: Цена сверху
+        in: query
+        name: price_to
+        type: number
+      - description: Ёршик
+        in: query
+        name: find_brush
+        type: boolean
       produces:
       - application/json
       responses:
