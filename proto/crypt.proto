@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package server;
 
-import "google/protobuf/timestamp.proto";
-
 option go_package = "crypt/generated";
 
 service CryptoService {
@@ -17,6 +15,9 @@ message ListCryptoCurrenciesRequest {
 
 message CryptoFilter {
   string cryptoexchange_name = 1;
+  double price_from = 2;
+  double price_to = 3;
+  bool find_brush = 4;
 }
 
 message ListCryptoCurrenciesResponse {
@@ -26,13 +27,12 @@ message ListCryptoCurrenciesResponse {
 message CryptoCurrency {
   int32 cryptocurrency_id = 1;
   string cryptocurrency_ticker = 2;
-  google.protobuf.Timestamp cryptocurrency_create_timestamp = 3;
-  repeated CryptoCurrencyInfo data = 4;
+  repeated CryptoCurrencyInfo data = 3;
 }
 
 message CryptoCurrencyInfo {
   string cryptoexchange_name = 1;
-  bytes ohlcv = 2;
-  int64 last = 3;
-  int64 spread = 4;
+  bytes olhcv = 2;
+  double last = 3;
+  double spread = 4;
 }

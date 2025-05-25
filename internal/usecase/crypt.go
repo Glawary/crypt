@@ -61,7 +61,7 @@ func (rec *CryptService) ListCryptoCurrency(ctx context.Context, filter *model.F
 			&cryptocurrencyNewId,
 			&tickerNew,
 			&dataCrypto.CryptoExchangeName,
-			&dataCrypto.DataOhlcv,
+			&dataCrypto.DataOlhcv,
 			&dataCrypto.DataOrderBook,
 		)
 		if err != nil {
@@ -106,7 +106,7 @@ func filterResult(res []*model.Crypto, filter *model.Filter) []*model.Crypto {
 		dataCrypto = make([]*model.DataCrypto, 0, len(item.Data))
 		for _, data := range item.Data {
 			var olhcv [][]float64
-			_ = json.Unmarshal([]byte(data.DataOhlcv), &olhcv)
+			_ = json.Unmarshal([]byte(data.DataOlhcv), &olhcv)
 			if !(len(olhcv) == 0 || (filter.PriceFrom > 0 && olhcv[len(olhcv)-1][4] < filter.PriceFrom) ||
 				(filter.PriceTo > 0 && olhcv[len(olhcv)-1][4] > filter.PriceTo) || (filter.FindBrush && !detectBrush(olhcv))) {
 				var orderBook *model.DataOrderBook

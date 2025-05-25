@@ -8,7 +8,7 @@ type Crypto struct {
 
 type DataCrypto struct {
 	CryptoExchangeName string  `db:"cryptoexchange_name"`
-	DataOhlcv          []byte  `db:"data_olhcv" json:"data_olhcv"`
+	DataOlhcv          []byte  `db:"data_olhcv" json:"data_olhcv"`
 	DataOrderBook      []byte  `db:"data_order_book" json:"data_order_book,omitempty"`
 	Last               float64 `db:"last" json:"last"`
 	Spread             float64 `db:"spread" json:"spread"`

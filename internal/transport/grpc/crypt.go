@@ -20,7 +20,13 @@ func NewCryptServer(cryptService *usecase.CryptService) *CryptServer {
 }
 
 func (rec *CryptServer) ListCryptoCurrencies(ctx context.Context, req *pb.ListCryptoCurrenciesRequest) (*pb.ListCryptoCurrenciesResponse, error) {
-	res, err := rec.cryptService.ListCryptoCurrency(ctx, &model.Filter{CryptoExchangeName: req.GetFilter().GetCryptoexchangeName()})
+	res, err := rec.cryptService.ListCryptoCurrency(ctx,
+		&model.Filter{
+			CryptoExchangeName: req.GetFilter().GetCryptoexchangeName(),
+			PriceFrom:          req.GetFilter().GetPriceFrom(),
+			PriceTo:            req.GetFilter().GetPriceTo(),
+			FindBrush:          req.GetFilter().GetFindBrush(),
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +36,9 @@ func (rec *CryptServer) ListCryptoCurrencies(ctx context.Context, req *pb.ListCr
 		for _, info := range val.Data {
 			data = append(data, &pb.CryptoCurrencyInfo{
 				CryptoexchangeName: info.CryptoExchangeName,
-				Ohlcv:              []byte(info.DataOhlcv),
+				Olhcv:              []byte(info.DataOlhcv),
+				Last:               info.Last,
+				Spread:             info.Spread,
 			})
 		}
 		currencies = append(currencies, &pb.CryptoCurrency{
