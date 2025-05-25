@@ -23,6 +23,8 @@ definitions:
         items:
           type: integer
         type: array
+      last:
+        type: number
       spread:
         type: number
     type: object

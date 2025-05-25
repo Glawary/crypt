@@ -119,6 +119,8 @@ func filterResult(res []*model.Crypto, filter *model.Filter) []*model.Crypto {
 						data.Spread = 0
 					}
 				}
+				data.Last = olhcv[len(olhcv)-1][4]
+				data.DataOrderBook = nil
 				dataCrypto = append(dataCrypto, data)
 			}
 		}

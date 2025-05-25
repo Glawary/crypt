@@ -101,6 +101,9 @@ const docTemplate = `{
                         "type": "integer"
                     }
                 },
+                "last": {
+                    "type": "number"
+                },
                 "spread": {
                     "type": "number"
                 }
