@@ -19,6 +19,12 @@ definitions:
         items:
           type: integer
         type: array
+      data_order_book:
+        items:
+          type: integer
+        type: array
+      spread:
+        type: number
     type: object
 host: localhost:8050
 info:

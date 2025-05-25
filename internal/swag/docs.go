@@ -94,6 +94,15 @@ const docTemplate = `{
                     "items": {
                         "type": "integer"
                     }
+                },
+                "data_order_book": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "spread": {
+                    "type": "number"
                 }
             }
         }

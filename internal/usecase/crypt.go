@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"encoding/json"
+	"math"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -27,6 +28,7 @@ func (rec *CryptService) ListCryptoCurrency(ctx context.Context, filter *model.F
 		"cc.cryptocurrency_ticker as cryptocurrency_ticker",
 		"ce.cryptoexchange_name as cryptoexchange_name",
 		"cd.data_olhcv as data_olhcv",
+		"cd.data_order_book as data_order_book",
 	).From("cryptocurrency_data as cd").
 		LeftJoin("cryptocurrency as cc ON cd.cryptocurrency_id = cc.cryptocurrency_id").
 		LeftJoin("cryptoexchange as ce ON ce.cryptoexchange_id = cd.cryptoexchange_id")
@@ -60,6 +62,7 @@ func (rec *CryptService) ListCryptoCurrency(ctx context.Context, filter *model.F
 			&tickerNew,
 			&dataCrypto.CryptoExchangeName,
 			&dataCrypto.DataOhlcv,
+			&dataCrypto.DataOrderBook,
 		)
 		if err != nil {
 			return nil, err
@@ -106,10 +109,21 @@ func filterResult(res []*model.Crypto, filter *model.Filter) []*model.Crypto {
 			_ = json.Unmarshal([]byte(data.DataOhlcv), &olhcv)
 			if !(len(olhcv) == 0 || (filter.PriceFrom > 0 && olhcv[len(olhcv)-1][4] < filter.PriceFrom) ||
 				(filter.PriceTo > 0 && olhcv[len(olhcv)-1][4] > filter.PriceTo) || (filter.FindBrush && !detectBrush(olhcv))) {
-				dataCrypto = append(dataCrypto, &model.DataCrypto{})
+				var orderBook *model.DataOrderBook
+				_ = json.Unmarshal(data.DataOrderBook, &orderBook)
+				if orderBook != nil && len(orderBook.Bids) > 0 && len(orderBook.Asks) > 0 {
+					spread := math.Round(((float64(orderBook.Asks[0][0])-float64(orderBook.Bids[0][0]))/float64(orderBook.Bids[0][0]))*100*1000) / 1000
+					if spread > 0 {
+						data.Spread = spread
+					} else {
+						data.Spread = 0
+					}
+				}
+				dataCrypto = append(dataCrypto, data)
 			}
 		}
 		if len(dataCrypto) > 0 {
+			item.Data = dataCrypto
 			out = append(out, item)
 		}
 	}
